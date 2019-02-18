@@ -19,11 +19,15 @@ def encode(videoFile, textFile):
         currHeight = 0
         currWidth = 0
         currRGB = 0
+        x = 0
         for data in fileBits:
+            print(data)
             for i in range(7, -1, -1):
                 currBit = getBit(data, i)
+                x += 1
                 currPixelRGB = frames[currFrame][currHeight][currWidth][currRGB]
                 frames[currFrame][currHeight][currWidth][currRGB] = changeLSB(currPixelRGB, currBit)
+                print('%d. %d -> %d - > %d' % (x, currPixelRGB, currBit, frames[currFrame][currHeight][currWidth][currRGB]))
                 currRGB += 1
                 # ganti pixel kalo currRGB dah 3
                 if currRGB == 2:
@@ -45,7 +49,7 @@ def encode(videoFile, textFile):
         sys.exit(-1)
 
 def getBit(data, pos):
-    return (data << pos & 0x01)
+    return (data >> pos & 1)
 
 def changeLSB(data, lsb):
     return (data & 254 | lsb)
