@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   version="1.0"
+   width="3000"
+   height="2000"
+   id="svg2">
+  <use
+     transform="matrix(1,0,0,-1,0,2000)"
+     id="use2844"
+     xlink:href="#path3188" />
+  <path
+     d="M 1129.132,1000 3000,2000 3000,0 1129.132,1000 z"
+     id="path3664"
+     style="fill:#b0313f" />
+  <path
+     d="M 1218.5035,1000 0,0 0,2000 1218.5035,1000 z"
+     id="path3246"
+     style="fill:#ffffff" />
+  <path
+     d="M 1218.504,1000 0,348.696 1e-4,1651.304 1218.504,1000 z"
+     id="path3680"
+     style="fill:#b0313f" />
+  <path
+     d="M 1218.504,1000 0,630.371 1e-4,1369.629 1218.504,1000 z"
+     id="path3682"
+     style="fill:#ffffff" />
+  <path
+     d="M 0,880 0,1120 1218.5,1000 0,880 z"
+     id="path3180"
+     style="fill:#b0313f" />
+  <path
+     d="M 1129.132,1000 3000,1567.522 3000,432.478 1129.132,1000 z"
+     id="path2888"
+     style="fill:#ffffff" />
+  <path
+     d="M 3000,815.75 1129.125,1000 3000,1184.25 l 0,-368.5 z"
+     id="path3186"
+     style="fill:#b0313f" />
+  <path
+     d="m 0,2000 1183.5097,0 0,-971.281 L 0,2000 z"
+     id="path3188"
+     style="fill:#b0313f" />
+  <path
+     d="m 386.4,2000 797.1097,0 0,-971.281 L 386.4,2000 z"
+     id="path3190"
+     style="fill:#ffffff" />
+  <path
+     d="m 664.3492,2000 519.1605,0 0,-971.281 L 664.3492,2000 z"
+     id="path3196"
+     style="fill:#b0313f" />
+  <path
+     d="m 888.8747,2000 294.635,0 0,-971.281 L 888.8747,2000 z"
+     id="path3198"
+     style="fill:#ffffff" />
+  <path
+     d="m 3000.6486,2000 -1817.1389,0 0,-971.281 L 3000.6486,2000 z"
+     id="path3202"
+     style="fill:#ffffff" />
+  <path
+     d="m 2367.019,2000 -1183.5093,0 0,-971.281 L 2367.019,2000 z"
+     id="path3204"
+     style="fill:#b0313f" />
+  <path
+     d="m 1980.6194,2000 -797.1097,0 0,-971.281 797.1097,971.281 z"
+     id="path3206"
+     style="fill:#ffffff" />
+  <path
+     d="m 1702.6702,2000 -519.1605,0 0,-971.281 519.1605,971.281 z"
+     id="path3208"
+     style="fill:#b0313f" />
+  <path
+     d="m 1478.1445,2000 -294.6348,0 0,-971.281 294.6348,971.281 z"
+     id="path3210"
+     style="fill:#ffffff" />
+  <path
+     d="M 1183.5,1028.7188 1087.8438,2000 l 191.3437,0 -95.6875,-971.2812 z"
+     id="path3200"
+     style="fill:#b0313f" />
+  <use
+     transform="matrix(1,0,0,-1,0,2000)"
+     id="use3668"
+     xlink:href="#path3190" />
+  <use
+     transform="matrix(1,0,0,-1,0,2000)"
+     id="use2846"
+     xlink:href="#path3196" />
+  <use
+     transform="matrix(1,0,0,-1,0,2000)"
+     id="use3670"
+     xlink:href="#path3198" />
+  <use
+     transform="matrix(1,0,0,-1,0,2000)"
+     id="use3676"
+     xlink:href="#path3202" />
+  <use
+     transform="matrix(1,0,0,-1,0,2000)"
+     id="use2852"
+     xlink:href="#path3204" />
+  <use
+     transform="matrix(1,0,0,-1,0,2000)"
+     id="use3674"
+     xlink:href="#path3206" />
+  <use
+     transform="matrix(1,0,0,-1,0,2000)"
+     id="use2850"
+     xlink:href="#path3208" />
+  <use
+     transform="matrix(1,0,0,-1,0,2000)"
+     id="use3672"
+     xlink:href="#path3210" />
+  <use
+     transform="matrix(1,0,0,-1,0,2000)"
+     id="use2848"
+     xlink:href="#path3200" />
+  <path
+     d="m 1666.667,1000 a 500,500 0 0 1 -1000,0 500,500 0 1 1 1000,0 z"
+     id="path2843"
+     style="fill:#b0313f" />
+</svg>

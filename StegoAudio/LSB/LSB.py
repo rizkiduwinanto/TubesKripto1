@@ -1,113 +1,89 @@
 import wave
-import struct
-import sys
 import base64
+import random
 
 class LeastSignificantBit:
   def __init__(self, audio_path):
     self.audio_path = audio_path
     self.audio = wave.open(self.audio_path, "r")
-    self.audio_frames = self.audio_to_frames()
-    self.frame_rate = self.audio.getframerate()
+    self.frame_length = self.audio.getnframes()
+    self.audio_params = self.audio.getparams()
+    self.audio_bytes = self.audio_to_bytes()
 
-  def audio_to_frames(self):
-    frame_length = self.audio.getnframes()
-    audio_frames = []
-    for _ in range(0, frame_length):
-      frame = self.audio.readframes(1)
-      data = struct.unpack("<h", frame)
-      audio_frames.append(data[0])
-    return audio_frames
+  def audio_to_bytes(self):
+    bytes = bytearray(list(self.audio.readframes(self.frame_length)))
+    return bytes
+
+  @staticmethod
+  def message_to_bytes(input_path):
+    with open(input_path, "rb") as file:
+      file_byte = file.read()
+    return base64.b64encode(file_byte).decode('utf-8')
   
-  def write_wave(self, new_audio_frames, sample_rate, output_path):
-    new_wave = wave.open(output_path, "w")
-    new_wave.setnchannels(1)
-    new_wave.setsampwidth(2)
-    new_wave.setframerate(sample_rate)
-    for frames in new_audio_frames:
-      byte_type = struct.pack("<h", frames)
-      new_wave.writeframes(byte_type)
-    new_wave.close()
+  def write_wave(self, frame_encoded, output_path):
+    with wave.open(output_path, 'wb') as wav_file:
+      wav_file.setparams(self.audio_params)
+      wav_file.writeframes(frame_encoded)
 
-  def write_output_file(self, message, output_path):
-    bytes_message = message.encode('utf-8')
-    with open(output_path, "wb") as file:
-      file.write(bytes_message)
-    file.close()
-
+  def write_output_file(self, message, extension, output_path):
+    file_byte = base64.b64decode(message.encode('utf-8'))
+    with open(output_path + '.' + extension, 'wb') as file:
+      file.write(file_byte)
+    
   @staticmethod
-  def file_to_intlist(file_input_path):
-    file = open(file_input_path, "rb")
-    file_byte = file.read()
-    file_intlist = []
-    for byte in bytearray(file_byte):
-      file_intlist.append(byte)
-    file_intlist.append(0)
-    return file_intlist
-
-  @staticmethod
-  def write_bit(integer, bit):
-    return (integer | 0x01) if bit else (integer & ~0x01)
-
-  @staticmethod
-  def read_bit(integer, position):
-    return ((0x01 << position & abs(integer)) >> position)
+  def encrypt_vigener(plaintext, key):
+    plaintext_int = [ord(letter) for letter in plaintext]
+    key_int = [ord(letter) for letter in key]
+    ciphertext = ''
+    for index in range(len(plaintext_int)):
+      value = plaintext_int[index] + key_int[index % len(key_int)]
+      ciphertext += chr(value % 256)
+    return ciphertext
   
-  def encode(self, message_input_path, key, output_wave_path):
+  def encode(self, message_input_path, key, output_wave_path, flag_encrypt, flag_random):
+    byte_message = self.message_to_bytes(message_input_path)
+    byte_message = self.encrypt_vigener(byte_message, key) if flag_encrypt else byte_message
     extension = message_input_path.split('.').pop()
-    message_integer_list = self.file_to_intlist(message_input_path)
-    total_bytes = len(message_integer_list)
-    total_bits = total_bytes * 8
-    total_frames = len(self.audio_frames)
-    new_audio_frames = []
-    index_audio = 0
-    if total_bits <= total_frames:
-      for int in message_integer_list:
-        for index in range(7, -1, -1):
-          new_int = self.write_bit(abs(self.audio_frames[index_audio]), self.read_bit(int, index))
-          if (self.audio_frames[index_audio] != abs(self.audio_frames[index_audio])):
-            new_audio_frames.append(-1 * new_int)
-          else:
-            new_audio_frames.append(new_int)
-          index_audio += 1
-      self.write_wave(new_audio_frames + self.audio_frames[index_audio:], self.frame_rate, output_wave_path)
+    length_message = len(byte_message)
+    string_message = byte_message + '#' + extension + '#' + str(length_message) + '#' + str(flag_encrypt) + '#' + str(flag_random) + '#'
+    bits_message = list(map(int, ''.join([bin(ord(i)).lstrip('0b').rjust(8,'0') for i in string_message])))
+    # seed = sum(ord(alphabet) for alphabet in key)
+    # random.seed(seed)
+    # random.shuffle(bits_message)
+    if len(bits_message) <= len(self.audio_bytes):
+      for index, bit in enumerate(bits_message):
+        self.audio_bytes[index] = (self.audio_bytes[index] & 254) | bit
+      self.write_wave(self.audio_bytes, output_wave_path)
     else:
-      print('Payload Excedded')
+      print('Payload Excedeed')
+
+  @staticmethod
+  def decrypt_vigener(ciphertext, key):
+    ciphertext_int = [ord(letter) for letter in ciphertext]
+    key_int = [ord(letter) for letter in key]
+    plaintext = ''
+    for index in range(len(ciphertext_int)):
+      value = ciphertext_int[index] - key_int[index % len(key_int)]
+      plaintext += chr(value % 256)
+    return plaintext
 
   def decode(self, key, output_message_path):
-    total_frames = len(self.audio_frames)
-    bitlist = []
-    for bits in self.audio_frames:
-      bitlist.append(self.read_bit(abs(bits), 0))
-    total_bytes = int(len(bitlist)/8)
-    new_byte = ""
-    end_byte = False
-    count = 0
-    message = []
-    for index in range(total_bytes):
-      if count < 8 and end_byte == False:
-        new_byte += str(bitlist[index])
-        count += 1
-      elif count >= 8:
-        char = int(new_byte, 2)
-        if (char == 0):
-          end_byte = True
-        message.append(chr(char))
-        new_byte = ""
-        count = 0
-        new_byte += str(bitlist[index])
-        count += 1
-      elif end_byte:
-        string_message = ""
-        message.pop()
-        for char in message:
-          string_message += char
-        self.write_output_file(string_message, output_message_path)
-        break
+    bits_extracted = [self.audio_bytes[i] & 1 for i in range(len(self.audio_bytes))]
+    # seed = sum(ord(alphabet) for alphabet in key)
+    # random.seed(seed)
+    # random.shuffle(bits_extracted)
+    string_message = "".join(chr(int("".join(map(str,bits_extracted[i:i+8])),2)) for i in range(0,len(bits_extracted),8))
+    splitted_string = string_message.split('#')
+    raw_message = splitted_string[0]
+    extension = splitted_string[1]
+    flag_decrypt = splitted_string[3]
+    flag_random = splitted_string[4]
+    message = self.decrypt_vigener(raw_message, key) if flag_decrypt == 'True' else raw_message
+    self.write_output_file(message, extension, output_message_path)
  
 if __name__ == "__main__":
-  lsb_encode = LeastSignificantBit("../Data/Vietnam.wav")
-  lsb_encode.encode("../Message/rinaldi.jpg", "CEBONG", '../New4.wav')
+  lsb_encode = LeastSignificantBit("../Data/LRMonoPhase4.wav")
+  lsb_encode.encode("../Message/plongaplongo.png", "TOLOL", '../GOT7.wav', True, True)
 
-  lsb_decode = LeastSignificantBit('../New4.wav')
-  lsb_decode.decode("CEBONG", "../dosbing.jpg")
+  lsb_decode = LeastSignificantBit('../WEMUSTLOVE.wav')
+  lsb_decode.decode("TOLOL", "../jokodok")
