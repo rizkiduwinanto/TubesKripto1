@@ -44,15 +44,20 @@ class LeastSignificantBit:
     byte_message = self.message_to_bytes(message_input_path)
     byte_message = self.encrypt_vigener(byte_message, key) if flag_encrypt else byte_message
     extension = message_input_path.split('.').pop()
-    length_message = len(byte_message)
-    string_message = byte_message + '#' + extension + '#' + str(length_message) + '#' + str(flag_encrypt) + '#' + str(flag_random) + '#'
+    string_message = "#".join([byte_message, extension]) + '#'
     bits_message = list(map(int, ''.join([bin(ord(i)).lstrip('0b').rjust(8,'0') for i in string_message])))
-    # seed = sum(ord(alphabet) for alphabet in key)
-    # random.seed(seed)
-    # random.shuffle(bits_message)
+    bit_order = list(range(len(self.audio_bytes)))
+    if flag_random:
+      seed = sum(ord(alphabet) for alphabet in key)
+      random.seed(seed)
+      random.shuffle(bit_order)
+    bits_message.insert(0, int(flag_encrypt))
+    bits_message.insert(0, int(flag_random))
     if len(bits_message) <= len(self.audio_bytes):
-      for index, bit in enumerate(bits_message):
-        self.audio_bytes[index] = (self.audio_bytes[index] & 254) | bit
+      self.audio_bytes[0] = (self.audio_bytes[0] & 254) | bits_message[0]
+      self.audio_bytes[1] = (self.audio_bytes[1] & 254) | bits_message[1]
+      for bit_index in range(2, len(bits_message)):
+        self.audio_bytes[bit_order[bit_index]] = (self.audio_bytes[bit_order[bit_index]] & 254) | bits_message[bit_index]
       self.write_wave(self.audio_bytes, output_wave_path)
     else:
       print('Payload Excedeed')
@@ -68,22 +73,24 @@ class LeastSignificantBit:
     return plaintext
 
   def decode(self, key, output_message_path):
-    bits_extracted = [self.audio_bytes[i] & 1 for i in range(len(self.audio_bytes))]
-    # seed = sum(ord(alphabet) for alphabet in key)
-    # random.seed(seed)
-    # random.shuffle(bits_extracted)
+    flag_random = self.audio_bytes[0] & 1 
+    flag_decrypt = self.audio_bytes[1] & 1 
+    bit_order = list(range(len(self.audio_bytes)))
+    if flag_random == 1:
+      seed = sum(ord(alphabet) for alphabet in key)
+      random.seed(seed)
+      random.shuffle(bit_order)
+    bits_extracted = [self.audio_bytes[bit_order[index]] & 1 for index in range(2, len(self.audio_bytes))]
     string_message = "".join(chr(int("".join(map(str,bits_extracted[i:i+8])),2)) for i in range(0,len(bits_extracted),8))
     splitted_string = string_message.split('#')
     raw_message = splitted_string[0]
     extension = splitted_string[1]
-    flag_decrypt = splitted_string[3]
-    flag_random = splitted_string[4]
-    message = self.decrypt_vigener(raw_message, key) if flag_decrypt == 'True' else raw_message
+    message = self.decrypt_vigener(raw_message, key) if flag_decrypt == 1 else raw_message
     self.write_output_file(message, extension, output_message_path)
  
 if __name__ == "__main__":
-  lsb_encode = LeastSignificantBit("../Data/LRMonoPhase4.wav")
-  lsb_encode.encode("../Message/plongaplongo.png", "TOLOL", '../GOT7.wav', True, True)
+  lsb_encode = LeastSignificantBit("../Data/DeclarationofWarAgainstJapan.wav")
+  lsb_encode.encode("../Message/Bayar.txt", "KONTOL", '../KILL.wav', True, True)
 
-  lsb_decode = LeastSignificantBit('../WEMUSTLOVE.wav')
-  lsb_decode.decode("TOLOL", "../jokodok")
+  lsb_decode = LeastSignificantBit('../KILL.wav')
+  lsb_decode.decode("KONTOL", "../Korupsi")
