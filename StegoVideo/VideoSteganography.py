@@ -5,7 +5,7 @@ import sys
 import VideoParser
 
 def encode(videoFile, messageFile, secretKey, flagEncrypt, flagRandom, flagLSB, outputFilename):
-    fileBits, metadataBits = getEncodedBits(messageFile, flagEncrypt, flagRandom, flagLSB)
+    fileBits, metadataBits = getEncodedBits(messageFile, secretKey, flagEncrypt, flagRandom, flagLSB)
     video = VideoParser.getVideo(videoFile)
     encodedFrames = []
     totalBitInFrame = video.width * video.height * 3
@@ -143,25 +143,21 @@ def decode(videoFilename, secretKey, outputFilename):
             currFrame += 1
             currHeight = 0
     message_byte = "".join(chr(int("".join(map(str,message_bit[i:i+8])),2)) for i in range(0,len(message_bit),8))
+    message_byte = decrypt_vigener(message_byte, secretKey) if message_flag_encrypt else message_byte
     writeOutput(message_byte, message_extension, outputFilename)
     # write message into file
     return
 
-def getEncodedBits(filename, flagEncrypt, flagRandom, flagLSB):
+def getEncodedBits(filename, key, flagEncrypt, flagRandom, flagLSB):
     with open(filename, "rb") as file:
       file_byte = file.read()
     byte_message = base64.b64encode(file_byte).decode('utf-8')
+    byte_message = encrypt_vigenere(byte_message, key) if flagEncrypt else byte_message
     extension = filename.split('.').pop()
     length_message = len(byte_message)
     string_metadata = str(length_message) + '#' + extension + '#' + str(flagEncrypt) + '#' + str(flagRandom) + '#' + str(flagLSB) + '#'
-    print(byte_message)
-    print(string_metadata)
     message_bit_list = list(map(int, ''.join([bin(ord(i)).lstrip('0b').rjust(8,'0') for i in byte_message])))
     metadata_bit_list = list(map(int, ''.join([bin(ord(i)).lstrip('0b').rjust(8,'0') for i in string_metadata])))
-    print(message_bit_list)
-    print(len(message_bit_list))
-    print(metadata_bit_list)
-    print(len(metadata_bit_list))
     return message_bit_list, metadata_bit_list
 
 def writeOutput(message, extension, filename):
@@ -169,6 +165,24 @@ def writeOutput(message, extension, filename):
     with open(filename + '.' + extension, 'wb') as file:
       file.write(file_byte)
     return
+
+def encrypt_vigenere(plaintext, key):
+    plaintext_int = [ord(letter) for letter in plaintext]
+    key_int = [ord(letter) for letter in key]
+    ciphertext = ''
+    for index in range(len(plaintext_int)):
+      value = plaintext_int[index] + key_int[index % len(key_int)]
+      ciphertext += chr(value % 256)
+    return ciphertext
+
+def decrypt_vigener(ciphertext, key):
+    ciphertext_int = [ord(letter) for letter in ciphertext]
+    key_int = [ord(letter) for letter in key]
+    plaintext = ''
+    for index in range(len(ciphertext_int)):
+      value = ciphertext_int[index] - key_int[index % len(key_int)]
+      plaintext += chr(value % 256)
+    return plaintext
 
 def getLSB(data):
     return data & 1
@@ -179,4 +193,5 @@ def changeLSB(data, lsb):
 if __name__ == "__main__":
     encode('test.avi', 'test.txt', 'SECRET', False, False, False, 'rassegna2_res.avi')
     decode('rassegna2_res.avi', 'SECRET', 'res')
-    #getEncodedBits('test.txt', False, False, False)
+    encode('test.avi', 'test.txt', 'SECRET', True, False, False, 'resEncrypted.avi')
+    decode('resEncrypted.avi', 'SECRET', 'decryptedTest')
