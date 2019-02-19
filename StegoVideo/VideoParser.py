@@ -42,7 +42,7 @@ class VideoFile:
             sys.exit()
     
     def countTotalBitsAndBytes(self):
-        byte = self.width * self.height * 3
+        byte = self.lenFrames * self.width * self.height * 3
         bit = byte * 8
         return bit, byte
 
@@ -64,19 +64,6 @@ def writeVideo(videoFrames, fps, width, height, outputFilename):
     out.release()
     return
     
-
-def test():
-    cap = cv2.VideoCapture('test.avi')
-    ret, frame = cap.read()
-    print(len(frame))
-    print(len(frame[0]))
-    print(len(frame[0][0]))
-    # height x width x rgb
-    # akses per bit: frame[currHeight][currWidth][currRBG]
-    # if currHeight >= height && currWidth >= width && currRGB >= RBG
-    #   push current frame to frames[]
-    #   get next frame
 if __name__ == "__main__":
-    test()
-    #testVid = VideoFile('test.avi')
-    #testVid.printVideoDetails()
+    testVid = VideoFile('test.avi')
+    testVid.printVideoDetails()
