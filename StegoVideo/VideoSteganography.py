@@ -178,7 +178,6 @@ def decode(videoFilename, secretKey, outputFilename):
                 currHeight = 0
 
     # double lsb
-    print(message_bit)
     if message_flag_twoLSB:
         message_byte = "".join(chr(int("".join(map(str,message_bit[i:i+4])),4)) for i in range(0,len(message_bit),4))
     else:
@@ -199,10 +198,8 @@ def getEncodedBits(filename, key, flagEncrypt, flagRandom, flag_twoLSB):
     string_metadata = str(length_message) + '#' + extension + '#' + str(flagEncrypt) + '#' + str(flagRandom) + '#' + str(flag_twoLSB) + '#'
     message_bit_list = list(map(int, ''.join([bin(ord(i)).lstrip('0b').rjust(8,'0') for i in byte_message])))
     metadata_bit_list = list(map(int, ''.join([bin(ord(i)).lstrip('0b').rjust(8,'0') for i in string_metadata])))
-    print(message_bit_list)
     if flag_twoLSB:
        message_twobit_list = [message_bit_list[i]*2+message_bit_list[i+1] for i in range(0, len(message_bit_list),2)]
-       print(message_twobit_list)
        return message_twobit_list, metadata_bit_list
     return message_bit_list, metadata_bit_list
 
