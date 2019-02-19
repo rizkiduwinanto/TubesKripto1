@@ -89,8 +89,8 @@ class LeastSignificantBit:
     self.write_output_file(message, extension, output_message_path)
  
 if __name__ == "__main__":
-  lsb_encode = LeastSignificantBit("../Data/DeclarationofWarAgainstJapan.wav")
-  lsb_encode.encode("../Message/Bayar.txt", "KONTOL", '../KILL.wav', True, True)
+  lsb_encode = LeastSignificantBit("../Data/LRMonoPhase4.wav")
+  lsb_encode.encode("../Message/plongaplongo.png", "PEMBOHONG", '../Jokodok1.wav', True, False)
 
-  lsb_decode = LeastSignificantBit('../KILL.wav')
-  lsb_decode.decode("KONTOL", "../Korupsi")
+  lsb_decode = LeastSignificantBit('../Jokodok1.wav')
+  lsb_decode.decode("PEMBOHONG", "../TKN")
