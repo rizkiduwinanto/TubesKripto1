@@ -57,7 +57,7 @@ def getVideo(filename):
     return VideoFile(filename)
 
 def writeVideo(videoFrames, fps, width, height, outputFilename):
-    fourcc = cv2.VideoWriter_fourcc(*'XVID')
+    fourcc = cv2.VideoWriter_fourcc('H', 'F', 'Y', 'U')
     out = cv2.VideoWriter(outputFilename, fourcc, fps, (width, height))
     for frame in videoFrames:
         out.write(frame)
