@@ -1,17 +1,18 @@
 import base64
 import cv2
 import numpy as np
+import random
 import sys
 import VideoParser
 
 def encode(videoFile, messageFile, secretKey, flagEncrypt, flagRandom, flagLSB, outputFilename):
     fileBits, metadataBits = getEncodedBits(messageFile, secretKey, flagEncrypt, flagRandom, flagLSB)
     video = VideoParser.getVideo(videoFile)
+    frames = video.frames
     encodedFrames = []
     totalBitInFrame = video.width * video.height * 3
     maxHeight = video.height
     maxWidth = video.width
-    frames = video.frames
     currFrame = 0
     currHeight = 0
     currWidth = 0
@@ -46,33 +47,44 @@ def encode(videoFile, messageFile, secretKey, flagEncrypt, flagRandom, flagLSB, 
 
     # simpen data
     if video.totalBit > len(fileBits):
-        currFrame = 1
-        currHeight = 0
-        currWidth = 0
-        currRGB = 0
-        x = 0
-        # print('data')
-        for bit in fileBits:
-            currPixelRGB = frames[currFrame][currHeight][currWidth][currRGB]
-            frames[currFrame][currHeight][currWidth][currRGB] = changeLSB(currPixelRGB, bit)
-            x += 1
-            #print('%d. %d -> %d - > %d' % (x, currPixelRGB, bit, frames[currFrame][currHeight][currWidth][currRGB]))
-            currRGB += 1
-            # ganti pixel kalo currRGB dah 3
-            if currRGB == 3:
-                currWidth += 1
-                currRGB = 0
-            # ganti baris kalo semua pixel sebaris selesai
-            if currWidth == maxWidth-1:
-                currHeight += 1
-                currWidth = 0
-            # ganti frame kalau semua pixel sebaris dan sekolom selesai
-            if currHeight == maxHeight-1:
-                currFrame += 1
-                currHeight = 0
-                encodedFrames.append(frames[currFrame])
-        encodedFrames += frames[currFrame:]
-        VideoParser.writeVideo(encodedFrames, video.fps, video.width, video.height, outputFilename)
+    # apus aja komentarnya kalo dah yakin
+        if flagRandom:
+            seed = sum(ord(alphabet) for alphabet in secretKey)
+            random.seed(seed)
+            bit_order = [[int(random.random()*(video.lenFrames-2)+1),int(random.random()*(video.height-1)),int(random.random()*(video.width)),int(random.random()*(2))] for i in range(len(fileBits))]
+            for order in range(len(fileBits)):
+                currPixelRGB = frames[bit_order[order][0]][bit_order[order][1]][bit_order[order][2]][bit_order[order][3]]
+                frames[bit_order[order][0]][bit_order[order][1]][bit_order[order][2]][bit_order[order][3]] = changeLSB(currPixelRGB, fileBits[order])
+            encodedFrames = frames
+            VideoParser.writeVideo(frames, video.fps, video.width, video.height, outputFilename)
+        else: #(pls indent bawahnya)
+            currFrame = 1
+            currHeight = 0
+            currWidth = 0
+            currRGB = 0
+            x = 0
+            # print('data')
+            for bit in fileBits:
+                currPixelRGB = frames[currFrame][currHeight][currWidth][currRGB]
+                frames[currFrame][currHeight][currWidth][currRGB] = changeLSB(currPixelRGB, bit)
+                x += 1
+                #print('%d. %d -> %d - > %d' % (x, currPixelRGB, bit, frames[currFrame][currHeight][currWidth][currRGB]))
+                currRGB += 1
+                # ganti pixel kalo currRGB dah 3
+                if currRGB == 3:
+                    currWidth += 1
+                    currRGB = 0
+                # ganti baris kalo semua pixel sebaris selesai
+                if currWidth == maxWidth-1:
+                    currHeight += 1
+                    currWidth = 0
+                # ganti frame kalau semua pixel sebaris dan sekolom selesai
+                if currHeight == maxHeight-1:
+                    currFrame += 1
+                    currHeight = 0
+                    encodedFrames.append(frames[currFrame])
+            encodedFrames += frames[currFrame:]
+            VideoParser.writeVideo(encodedFrames, video.fps, video.width, video.height, outputFilename)
     else:
         print("Not enough frames to encode message in.")
         sys.exit(-1)
@@ -112,6 +124,7 @@ def decode(videoFilename, secretKey, outputFilename):
                 hashtagCounter += 1
             if hashtagCounter == 5: 
                 metadataFinished = not metadataFinished
+    
     # Get Metadata details
     currFrame = 1
     currWidth = 0
@@ -120,30 +133,47 @@ def decode(videoFilename, secretKey, outputFilename):
     metadata = metadata_string.split('#')
     message_size = int(metadata[0])
     message_extension = metadata[1]
-    message_flag_encrypt = bool(metadata[2])
-    message_flag_random = bool(metadata[3])
-    message_flag_LSB = bool(metadata[4])
+    message_flag_encrypt = True if metadata[2] == 'True' else False
+    message_flag_random = True if metadata[3] == 'True' else False
+    message_flag_LSB = True if metadata[4] == 'True' else False
+    
     # Parse message
     message_bit = []
-    for i in range(message_size * 8):
-        currPixelRGB = frames[currFrame][currHeight][currWidth][currRGB]
-        message_bit.append(getLSB(currPixelRGB))
-        #print('%d. %d -> %d - > %d' % (x, currPixelRGB, bit, frames[currFrame][currHeight][currWidth][currRGB]))
-        currRGB += 1
-        # ganti pixel kalo currRGB dah 3
-        if currRGB == 3:
-            currWidth += 1
-            currRGB = 0
-        # ganti baris kalo semua pixel sebaris selesai
-        if currWidth == video.width-1:
-            currHeight += 1
-            currWidth = 0
-        # ganti frame kalau semua pixel sebaris dan sekolom selesai
-        if currHeight == video.height-1:
-            currFrame += 1
-            currHeight = 0
+    # apus aja komentarnya kalo dah yakin
+    if message_flag_random:
+        seed = sum(ord(alphabet) for alphabet in secretKey)
+        random.seed(seed)
+        bit_order = [[int(random.random()*(video.lenFrames-2)+1),int(random.random()*(video.height-1)),int(random.random()*(video.width)),int(random.random()*(2))] for i in range(message_size*8)]
+        for order in range(message_size*8):
+            currPixelRGB = frames[bit_order[order][0]][bit_order[order][1]][bit_order[order][2]][bit_order[order][3]]
+            bit = getLSB(currPixelRGB)
+            message_bit.append(bit)
+       
+
+    else: #(pls indent bawahnya)
+        for i in range(message_size * 8):
+            currPixelRGB = frames[currFrame][currHeight][currWidth][currRGB]
+            message_bit.append(getLSB(currPixelRGB))
+            #print('%d. %d -> %d - > %d' % (x, currPixelRGB, bit, frames[currFrame][currHeight][currWidth][currRGB]))
+            currRGB += 1
+            # ganti pixel kalo currRGB dah 3
+            if currRGB == 3:
+                currWidth += 1
+                currRGB = 0
+            # ganti baris kalo semua pixel sebaris selesai
+            if currWidth == video.width-1:
+                currHeight += 1
+                currWidth = 0
+            # ganti frame kalau semua pixel sebaris dan sekolom selesai
+            if currHeight == video.height-1:
+                currFrame += 1
+                currHeight = 0
+
     message_byte = "".join(chr(int("".join(map(str,message_bit[i:i+8])),2)) for i in range(0,len(message_bit),8))
+    print(message_byte)
+    print(message_flag_encrypt)
     message_byte = decrypt_vigener(message_byte, secretKey) if message_flag_encrypt else message_byte
+    print(message_byte)
     writeOutput(message_byte, message_extension, outputFilename)
     # write message into file
     return
@@ -158,6 +188,8 @@ def getEncodedBits(filename, key, flagEncrypt, flagRandom, flagLSB):
     string_metadata = str(length_message) + '#' + extension + '#' + str(flagEncrypt) + '#' + str(flagRandom) + '#' + str(flagLSB) + '#'
     message_bit_list = list(map(int, ''.join([bin(ord(i)).lstrip('0b').rjust(8,'0') for i in byte_message])))
     metadata_bit_list = list(map(int, ''.join([bin(ord(i)).lstrip('0b').rjust(8,'0') for i in string_metadata])))
+    print('Real message')
+    print(message_bit_list)
     return message_bit_list, metadata_bit_list
 
 def writeOutput(message, extension, filename):
@@ -191,7 +223,9 @@ def changeLSB(data, lsb):
     return (data & 254 | lsb)
 
 if __name__ == "__main__":
-    encode('test.avi', 'test.txt', 'SECRET', False, False, False, 'rassegna2_res.avi')
-    decode('rassegna2_res.avi', 'SECRET', 'res')
-    encode('test.avi', 'test.txt', 'SECRET', True, False, False, 'resEncrypted.avi')
-    decode('resEncrypted.avi', 'SECRET', 'decryptedTest')
+    #encode('test.avi', 'test.txt', 'SECRET', False, False, False, 'rassegna2_res.avi')
+    #decode('rassegna2_res.avi', 'SECRET', 'res')
+    #encode('test.avi', 'test.txt', 'SECRET', True, False, False, 'resEncrypted.avi')
+    #decode('resEncrypted.avi', 'SECRET', 'decryptedTest')
+    encode('test.avi', 'test.txt', 'SECRET', False, True, False, 'resRandom.avi')
+    decode('resRandom.avi', 'SECRET', 'randomTest')
