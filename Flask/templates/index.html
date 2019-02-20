@@ -1,0 +1,78 @@
+<!doctype html>
+<html>
+   <head>
+      <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+      <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+      <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+   </head>
+   <body>
+      <div class="container">
+         <div class="row">
+            <div class="col-sm">
+               <h1>Encode Audio</h1>
+               <form action = "http://localhost:5000/lsb/encode" method = "POST" 
+                  enctype = "multipart/form-data">
+                  <div class="form-row">
+                     <div class="form-group col-md-6">
+                        <label>Message</label>
+                        <input type = "file" class="form-control-file" name = "message" />
+                     </div>
+                     <div class="form-group col-md-6">
+                        <label>WAV File</label>
+                        <input type = "file" class="form-control-file" name = "audio-wave" /> 
+                     </div>
+                  </div>
+                  <div class="form-group"> 
+                     <label>Key</label> 
+                     <input type = "text" class="form-control" name = "key" />
+                  </div>
+                  <div class="form-check form-check-inline"> 
+                     <input type="hidden" name = "encrypt" value="0" />
+                     <input type="checkbox" class="form-check-input" name = "encrypt" value="1"/>
+                     <label class="form-check-label">
+                        Encrypt
+                     </label> 
+                  </div>
+                  <div class="form-check form-check-inline"> 
+                     <input type="hidden" name = "random" value="0" />
+                     <input type="checkbox" class="form-check-input" name = "random" value="1"/>
+                     <label class="form-check-label">
+                        Random
+                     </label> 
+                  </div>
+                  <div class="form-group">
+                     <button type="submit" class="btn btn-primary">Submit</button>
+                  </div>
+               </form>
+               <audio controls>
+                  <source src="horse.ogg" type="audio/wav">
+               </audio>
+               <button type="submit" class="btn btn-primary">Download</button>
+            </div>
+            <div class="col-sm">
+               <h1>Decode Audio</h1>
+               <form action = "http://localhost:5000/lsb/decode" method = "POST" 
+                  enctype = "multipart/form-data">
+                  <div class="form-group">
+                     <label>WAV File</label>
+                     <input type = "file" class="form-control-file" name = "audio-wave" /> 
+                  </div>
+                  <div class="form-group"> 
+                     <label>Key</label> 
+                     <input type = "text" class="form-control" name = "key" />
+                  </div>
+                  <button type="submit" class="btn btn-primary">Submit</button>
+               </form>
+               {% if encoded_file %}
+               <audio controls>
+                  <source src="" type="audio/wav">
+               </audio>
+               <button type="submit" class="btn btn-primary">Download</button>
+               {% endif %}
+            </div>
+         </div>
+      </div>
+   </body>
+   <script src="index.js"></script>
+</html>

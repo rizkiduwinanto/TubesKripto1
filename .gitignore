@@ -1,0 +1,5 @@
+
+\.idea/
+
+Flask/venv
+Flask/__pycache__
