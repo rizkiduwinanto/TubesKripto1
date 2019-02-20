@@ -61,7 +61,8 @@ class stuff:
         pixelPath = Util.generatePixelSteps(self.key,self.videoInput,self.isRandom)
         if (self.fileInput.willItFit(self.videoInput)):
             bits = ''
-            for i in self.fileInput.getFileInputByte():
+            encrypted = Util.encryptVigenereAsciiForBytes(self.fileInput.getFileInputByte(),self.key)
+            for i in encrypted:
                 bits += Util.intToBinaryString(i)
             colorIndex = 0
             for j in framePath:
@@ -181,6 +182,8 @@ class extract:
                     break
             if (counter >= self.bitLength):
                 break
+
+        out = Util.decryptVigenereAsciiForBytes(fileOutput,self.key)
         
-        self.write(fileOutput)
+        self.write(out)
         

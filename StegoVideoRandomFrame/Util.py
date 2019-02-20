@@ -19,11 +19,18 @@ def generateSeed(inputstring):
 
     return output
 
-def encryptVigenereAsciiForBytes(input,key,mode):
+def encryptVigenereAsciiForBytes(input,key):
     cipher = input
     for i in range(len(cipher)):
-        cipher[i] = ((cipher[i] + ord(key[i]%len(key))) % 256)
+        cipher[i] = ((cipher[i] + ord(key[i%len(key)])) % 256)
     return cipher  
+
+def decryptVigenereAsciiForBytes(input,key):
+    plain = input
+    for i in range(len(plain)):
+        plain[i] = ((plain[i] - ord(key[i%len(key)])) % 256)
+    return plain  
+
 
 def generateFrameSteps(key,videoInput,fileBitLength):
     requiredFrame = (math.ceil(fileBitLength / (3 * videoInput.getHeight() * videoInput.getWidth())))

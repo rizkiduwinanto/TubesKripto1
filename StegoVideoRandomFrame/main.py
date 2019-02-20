@@ -10,18 +10,6 @@ if __name__ == "__main__":
     key = 'diar'
     isRandom = True
 
-    
-
-    # video1.writeVideo('tes.avi')
-
-    # video2 = video('./tes.avi')
-
-    # print("length:",readLength(video2))
-    # print("extension:",readExtension(video2))
-
-    # print(generateFrameSteps("diar",video1,fileInput))
-
-    # print(generatePixelSteps('diar',video1))
 
     stuffer = stuff(video1,file1,key,isRandom)
     stuffer.insertLength()
